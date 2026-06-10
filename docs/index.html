@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AttriChart: overlapping attribution flow charts</title>
+    <meta
+      name="description"
+      content="A Sankey-style flow chart that renders multi-touch membership as visible overlap instead of double-counting or losing the path."
+    />
+    <style>
+      :root {
+        --bg: #f7f5f1;
+        --panel: #ffffff;
+        --ink: #1c1b19;
+        --muted: #6f6a62;
+        --line: #e6e2da;
+        --accent: #2563eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding: 48px 24px 72px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 38px;
+        letter-spacing: -0.02em;
+        margin: 0 0 10px;
+      }
+      h2 {
+        font-size: 21px;
+        margin: 56px 0 6px;
+      }
+      p.sub {
+        color: var(--muted);
+        font-size: 16px;
+        max-width: 720px;
+        margin: 0 0 18px;
+      }
+      p.sub b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .links {
+        margin: 18px 0 36px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .links a {
+        display: inline-block;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ink);
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 8px 16px;
+      }
+      .links a.primary {
+        background: var(--ink);
+        color: #fff;
+        border-color: var(--ink);
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 26px 28px 22px;
+        box-shadow:
+          0 1px 0 rgba(0, 0, 0, 0.02),
+          0 12px 30px -18px rgba(0, 0, 0, 0.18);
+      }
+      pre {
+        background: #1c1b19;
+        color: #f3f0ea;
+        border-radius: 10px;
+        padding: 18px 20px;
+        overflow-x: auto;
+        font-size: 13.5px;
+        line-height: 1.55;
+      }
+      code {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      }
+      p code,
+      li code {
+        background: #efece6;
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 0.92em;
+      }
+      footer {
+        margin-top: 64px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      footer a {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>AttriChart</h1>
+      <p class="sub">
+        A Sankey-style flow chart for journeys with <b>overlapping membership</b>. Standard Sankey
+        libraries force every unit onto exactly one path, so multi-touch attribution gets
+        double-counted, fractionally split, or flattened to single-touch. AttriChart treats the
+        overlap explicitly: the overlap stage renders <b>reach</b> and its translucent ribbons
+        darken where membership is shared, while downstream stages consolidate to true unique
+        counts.
+      </p>
+      <div class="links">
+        <a class="primary" href="https://github.com/attrichart/attrichart">GitHub</a>
+        <a href="https://www.npmjs.com/package/@attrichart/core">@attrichart/core</a>
+        <a href="https://www.npmjs.com/package/@attrichart/vue">@attrichart/vue</a>
+      </div>
+
+      <h2>Marketing attribution, reach mode (default)</h2>
+      <p class="sub">
+        4,000 unique users, 5,400 total reach. The campaign column sums past 100% because
+        multi-touch users appear in every campaign that touched them. Where ribbons stack and
+        darken, attribution is shared. Hover any ribbon to isolate one cohort's full path.
+      </p>
+      <div class="card"><div id="demo-reach"></div></div>
+
+      <h2>Fractional mode</h2>
+      <p class="sub">
+        The same data with <code>attributionMode: "fractional"</code>. Shared cohorts split their
+        width evenly across campaigns, so every column stays strictly additive. Tidier arithmetic,
+        less visual emphasis on multi-touch.
+      </p>
+      <div class="card"><div id="demo-fractional"></div></div>
+
+      <h2>Not just marketing, not just three stages</h2>
+      <p class="sub">
+        A streaming service journey across four stages with the overlap stage in the middle:
+        subscribers watch several genres, so that column shows reach while its neighbors stay clean
+        partitions.
+      </p>
+      <div class="card"><div id="demo-stages"></div></div>
+
+      <h2>Install</h2>
+      <pre><code>npm install @attrichart/core
+# or, in a Vue 3 app
+npm install @attrichart/vue</code></pre>
+      <pre><code>import { AttriChart } from '@attrichart/core';
+
+const chart = new AttriChart(document.querySelector('#chart'), {
+  stages: [
+    { id: 'campaign', overlap: true, nodes: [{ id: 'search' }, { id: 'social' }] },
+    { id: 'conversion', nodes: [{ id: 'purchase' }, { id: 'none' }] },
+  ],
+  records: [
+    { value: 500, membership: { campaign: ['search'], conversion: 'purchase' } },
+    { value: 200, membership: { campaign: ['search', 'social'], conversion: 'purchase' } },
+    { value: 300, membership: { campaign: ['social'], conversion: 'none' } },
+  ],
+});
+chart.render();</code></pre>
+
+      <footer>
+        MIT licensed. Source, docs, and the full options reference are on
+        <a href="https://github.com/attrichart/attrichart">GitHub</a>.
+      </footer>
+    </div>
+
+    <script src="./dist/index.global.js"></script>
+    <script src="./demos.js"></script>
+  </body>
+</html>

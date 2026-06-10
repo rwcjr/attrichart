@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AttriChart quick start</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+      .card {
+        border: 1px solid #e6e2da;
+        border-radius: 12px;
+        padding: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AttriChart quick start</h1>
+    <p>Build the library first with <code>pnpm build</code>, then open this file.</p>
+    <div class="card"><div id="chart"></div></div>
+
+    <!--
+  In an app, install and import instead:
+
+    npm install @attrichart/core
+
+    import { AttriChart } from '@attrichart/core';
+-->
+    <script src="../../packages/core/dist/index.global.js"></script>
+    <script>
+      const { AttriChart } = attrichart;
+
+      const data = {
+        stages: [
+          {
+            id: 'campaign',
+            label: 'Campaigns',
+            overlap: true,
+            nodes: [
+              { id: 'search', label: 'Paid Search', color: '#2563eb' },
+              { id: 'social', label: 'Social', color: '#e07a2b' },
+            ],
+          },
+          {
+            id: 'conversion',
+            label: 'Conversion',
+            nodes: [
+              { id: 'purchase', label: 'Purchase', color: '#2f9e57' },
+              { id: 'none', label: 'No Conversion', color: '#9b958c' },
+            ],
+          },
+        ],
+        records: [
+          { value: 500, membership: { campaign: ['search'], conversion: 'purchase' } },
+          { value: 300, membership: { campaign: ['social'], conversion: 'none' } },
+          { value: 200, membership: { campaign: ['search', 'social'], conversion: 'purchase' } },
+        ],
+      };
+
+      const chart = new AttriChart(document.getElementById('chart'), data);
+      chart.on('nodeClick', (node) => console.log('clicked', node));
+      chart.render();
+    </script>
+  </body>
+</html>

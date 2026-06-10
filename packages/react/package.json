@@ -1,0 +1,7 @@
+{
+  "name": "@attrichart/react",
+  "version": "0.0.0",
+  "private": true,
+  "description": "React wrapper for AttriChart. Not yet implemented; this placeholder reserves the structure. See the repository roadmap.",
+  "license": "MIT"
+}

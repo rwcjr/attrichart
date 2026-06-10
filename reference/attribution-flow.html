@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Attribution Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f1;
+    --panel: #ffffff;
+    --ink: #1c1b19;
+    --muted: #6f6a62;
+    --line: #e6e2da;
+    --c-search: #2563eb;
+    --c-social: #e07a2b;
+    --c-display: #129b8b;
+    --conv-purchase: #2f9e57;
+    --conv-lead: #d99a16;
+    --conv-none: #9b958c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 24px 64px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+  }
+  .sub { color: var(--muted); font-size: 15px; max-width: 640px; line-height: 1.5; margin: 0 0 28px; }
+  .sub b { color: var(--ink); font-weight: 600; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 28px 18px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 12px 30px -18px rgba(0,0,0,0.18);
+  }
+  .col-heads { display: flex; justify-content: space-between; margin: 0 0 4px; }
+  .col-heads span {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  svg { width: 100%; height: auto; display: block; }
+  .node rect { stroke: rgba(0,0,0,0.12); stroke-width: 1; }
+  .node-label { font-size: 12.5px; fill: var(--ink); font-weight: 600; }
+  .node-sub { font-size: 11px; fill: var(--muted); }
+  .ribbon { transition: opacity 140ms ease; cursor: pointer; }
+  svg.dimmed .ribbon { opacity: 0.06 !important; }
+  svg.dimmed .ribbon.hot { opacity: 0.9 !important; }
+  .legend { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .legend .group { display: flex; align-items: center; gap: 10px; }
+  .legend .group > span:first-child { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+  .swatch { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink); }
+  .swatch i { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
+  .foot { margin-top: 22px; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+  .foot b { color: var(--ink); font-weight: 600; }
+  .tag { display:inline-block; font-size:11px; font-weight:600; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:2px 9px; margin-left:8px; vertical-align: middle;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Campaign attribution flow <span class="tag">prototype</span></h1>
+  <p class="sub">Source &rarr; traffic &rarr; conversion, with shared attribution drawn as overlap. The <b>campaign column shows reach</b>, so its segments sum past 100% because multi&#8209;touch users appear in every campaign that touched them. Flow consolidates to <b>true unique counts</b> from the traffic column rightward. Hover any ribbon to follow one path.</p>
+
+  <div class="card">
+    <div class="col-heads">
+      <span>Campaigns &middot; reach</span>
+      <span style="position:absolute; left:50%; transform:translateX(-50%);">Traffic type</span>
+      <span>Conversion</span>
+    </div>
+    <div id="chart"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <p class="foot">The left edge is where overlap lives: a user touched by two campaigns is drawn from <b>both</b> source segments, and where those translucent ribbons stack they darken, which is the shared attribution made literal. As each ribbon moves right it merges into one body, so the traffic and conversion columns stay honest 100% partitions and the widths there map to real visitors, not inflated touch counts.</p>
+</div>
+
+<script>
+const data = {
+  campaigns: [
+    { id: "search",  label: "Paid Search", color: "var(--c-search)",  raw: "#2563eb" },
+    { id: "social",  label: "Social",      color: "var(--c-social)",  raw: "#e07a2b" },
+    { id: "display", label: "Display",     color: "var(--c-display)", raw: "#129b8b" },
+  ],
+  traffic: [
+    { id: "product", label: "Product Page" },
+    { id: "landing", label: "Landing Page" },
+    { id: "blog",    label: "Blog" },
+  ],
+  conversion: [
+    { id: "purchase", label: "Purchase", raw: "#2f9e57" },
+    { id: "lead",     label: "Lead",     raw: "#d99a16" },
+    { id: "none",     label: "No Conversion", raw: "#9b958c" },
+  ],
+  // each cohort = users who share the exact same path
+  cohorts: [
+    { c: ["search"],                     t: "product", v: "purchase", u: 900 },
+    { c: ["search"],                     t: "landing", v: "lead",     u: 400 },
+    { c: ["social"],                     t: "blog",    v: "none",     u: 700 },
+    { c: ["social"],                     t: "landing", v: "lead",     u: 350 },
+    { c: ["display"],                    t: "landing", v: "none",     u: 500 },
+    { c: ["search","social"],            t: "product", v: "purchase", u: 600 },
+    { c: ["social","display"],           t: "blog",    v: "lead",     u: 300 },
+    { c: ["search","social","display"],  t: "product", v: "purchase", u: 250 },
+  ],
+};
+
+// ---- geometry ----
+const W = 1040, H = 560;
+const NODE_W = 22;
+const SEG_GAP = 10;
+const PAD_TOP = 14, PAD_BOT = 14;
+const colX = { camp: 8, traf: (W - NODE_W) / 2, conv: W - NODE_W - 8 };
+
+const colorMap = Object.fromEntries(data.campaigns.map(c => [c.id, c.raw]));
+const convColor = Object.fromEntries(data.conversion.map(c => [c.id, c.raw]));
+
+const totalUnique = data.cohorts.reduce((s, k) => s + k.u, 0);
+const reach = Object.fromEntries(data.campaigns.map(c => [c.id, 0]));
+data.cohorts.forEach(k => k.c.forEach(c => reach[c] += k.u));
+const reachTotal = Object.values(reach).reduce((a, b) => a + b, 0);
+
+const drawH = H - PAD_TOP - PAD_BOT;
+const pxPerUser = (drawH - (data.campaigns.length - 1) * SEG_GAP) / reachTotal;
+
+function colHeight(totalUsers, nSeg) { return totalUsers * pxPerUser + (nSeg - 1) * SEG_GAP; }
+function topFor(totalUsers, nSeg) { return PAD_TOP + (drawH - colHeight(totalUsers, nSeg)) / 2; }
+
+// LEFT: stack campaigns; within each, stack cohorts that include it (array order)
+const leftBands = {}; const campSeg = {};
+{
+  let y = topFor(reachTotal, data.campaigns.length);
+  data.campaigns.forEach(c => {
+    const segTop = y;
+    data.cohorts.forEach((k, i) => {
+      if (!k.c.includes(c.id)) return;
+      const h = k.u * pxPerUser;
+      leftBands[c.id + "|" + i] = { yTop: y, h };
+      y += h;
+    });
+    campSeg[c.id] = { yTop: segTop, yBot: y };
+    y += SEG_GAP;
+  });
+}
+
+// MIDDLE: stack traffic types; each cohort appears once
+const midBands = {}; const trafSeg = {};
+{
+  let y = topFor(totalUnique, data.traffic.length);
+  data.traffic.forEach(t => {
+    const segTop = y;
+    data.cohorts.forEach((k, i) => {
+      if (k.t !== t.id) return;
+      const h = k.u * pxPerUser;
+      midBands[i] = { yTop: y, h };
+      y += h;
+    });
+    trafSeg[t.id] = { yTop: segTop, yBot: y };
+    y += SEG_GAP;
+  });
+}
+
+// RIGHT: stack conversions
+const rightBands = {}; const convSeg = {};
+{
+  let y = topFor(totalUnique, data.conversion.length);
+  data.conversion.forEach(v => {
+    const segTop = y;
+    data.cohorts.forEach((k, i) => {
+      if (k.v !== v.id) return;
+      const h = k.u * pxPerUser;
+      rightBands[i] = { yTop: y, h };
+      y += h;
+    });
+    convSeg[v.id] = { yTop: segTop, yBot: y };
+    y += SEG_GAP;
+  });
+}
+
+function ribbon(x0, y0t, x1, y1t, w) {
+  const y0b = y0t + w, y1b = y1t + w;
+  const mx = x0 + (x1 - x0) * 0.5;
+  return `M${x0},${y0t} C${mx},${y0t} ${mx},${y1t} ${x1},${y1t} `
+       + `L${x1},${y1b} C${mx},${y1b} ${mx},${y0b} ${x0},${y0b} Z`;
+}
+
+const pct = n => Math.round((n / totalUnique) * 100);
+let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Campaign attribution flow diagram">`;
+
+// LEFT ribbons (campaign-colored, translucent so overlap darkens)
+data.cohorts.forEach((k, i) => {
+  const mid = midBands[i];
+  k.c.forEach(cid => {
+    const lb = leftBands[cid + "|" + i];
+    svg += `<path class="ribbon r${i}" data-cohort="${i}" `
+        +  `d="${ribbon(colX.camp + NODE_W, lb.yTop, colX.traf, mid.yTop, mid.h)}" `
+        +  `fill="${colorMap[cid]}" fill-opacity="0.4" />`;
+  });
+});
+
+// RIGHT ribbons (conversion-colored, the consolidated unique flow)
+data.cohorts.forEach((k, i) => {
+  const mid = midBands[i], rb = rightBands[i];
+  svg += `<path class="ribbon r${i}" data-cohort="${i}" `
+      +  `d="${ribbon(colX.traf + NODE_W, mid.yTop, colX.conv, rb.yTop, rb.h)}" `
+      +  `fill="${convColor[k.v]}" fill-opacity="0.5" />`;
+});
+
+// NODES
+function nodeRect(x, seg, fill) {
+  return `<rect x="${x}" y="${seg.yTop}" width="${NODE_W}" height="${seg.yBot - seg.yTop}" rx="3" fill="${fill}" />`;
+}
+data.campaigns.forEach(c => {
+  const s = campSeg[c.id];
+  svg += `<g class="node">${nodeRect(colX.camp, s, c.raw)}`;
+  svg += `<text class="node-label" x="${colX.camp + NODE_W + 8}" y="${(s.yTop + s.yBot)/2 - 2}">${c.label}</text>`;
+  svg += `<text class="node-sub" x="${colX.camp + NODE_W + 8}" y="${(s.yTop + s.yBot)/2 + 13}">${reach[c.id].toLocaleString()} reach</text></g>`;
+});
+data.traffic.forEach(t => {
+  const s = trafSeg[t.id]; const tot = data.cohorts.filter(k=>k.t===t.id).reduce((a,b)=>a+b.u,0);
+  svg += `<g class="node">${nodeRect(colX.traf, s, "#3c3a36")}`;
+  svg += `<text class="node-label" x="${colX.traf - 8}" y="${(s.yTop + s.yBot)/2 - 2}" text-anchor="end">${t.label}</text>`;
+  svg += `<text class="node-sub" x="${colX.traf - 8}" y="${(s.yTop + s.yBot)/2 + 13}" text-anchor="end">${tot.toLocaleString()} &middot; ${pct(tot)}%</text></g>`;
+});
+data.conversion.forEach(v => {
+  const s = convSeg[v.id]; const tot = data.cohorts.filter(k=>k.v===v.id).reduce((a,b)=>a+b.u,0);
+  svg += `<g class="node">${nodeRect(colX.conv, s, v.raw)}`;
+  svg += `<text class="node-label" x="${colX.conv - 8}" y="${(s.yTop + s.yBot)/2 - 2}" text-anchor="end">${v.label}</text>`;
+  svg += `<text class="node-sub" x="${colX.conv - 8}" y="${(s.yTop + s.yBot)/2 + 13}" text-anchor="end">${tot.toLocaleString()} &middot; ${pct(tot)}%</text></g>`;
+});
+
+svg += `</svg>`;
+document.getElementById("chart").innerHTML = svg;
+
+// hover: highlight a single cohort path across all columns
+const svgEl = document.querySelector("#chart svg");
+svgEl.querySelectorAll(".ribbon").forEach(p => {
+  p.addEventListener("mouseenter", () => {
+    const id = p.getAttribute("data-cohort");
+    svgEl.classList.add("dimmed");
+    svgEl.querySelectorAll(".r" + id).forEach(e => e.classList.add("hot"));
+  });
+  p.addEventListener("mouseleave", () => {
+    svgEl.classList.remove("dimmed");
+    svgEl.querySelectorAll(".ribbon").forEach(e => e.classList.remove("hot"));
+  });
+});
+
+// legend
+const lg = document.getElementById("legend");
+lg.innerHTML =
+  `<div class="group"><span>Source</span>` +
+  data.campaigns.map(c => `<span class="swatch"><i style="background:${c.raw}"></i>${c.label}</span>`).join("") +
+  `</div>` +
+  `<div class="group"><span>Outcome</span>` +
+  data.conversion.map(v => `<span class="swatch"><i style="background:${v.raw}"></i>${v.label}</span>`).join("") +
+  `</div>` +
+  `<div class="group"><span style="margin-left:auto">${totalUnique.toLocaleString()} unique users &middot; ${reachTotal.toLocaleString()} total reach</span></div>`;
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{
+  "name": "@attrichart/vue",
+  "version": "0.1.0",
+  "description": "Vue 3 component for AttriChart overlapping attribution flow charts, with first-class Vuetify 3 theme integration.",
+  "license": "MIT",
+  "author": "Robert Coleman",
+  "homepage": "https://github.com/attrichart/attrichart#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/attrichart/attrichart.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/attrichart/attrichart/issues"
+  },
+  "keywords": [
+    "sankey",
+    "attribution",
+    "multi-touch",
+    "marketing",
+    "funnel",
+    "flow",
+    "chart",
+    "dataviz",
+    "vue",
+    "vue3",
+    "vuetify",
+    "component"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@attrichart/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0",
+    "vue": "^3.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

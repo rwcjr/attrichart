@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AttriChart demos</title>
+    <style>
+      :root {
+        --bg: #f7f5f1;
+        --panel: #ffffff;
+        --ink: #1c1b19;
+        --muted: #6f6a62;
+        --line: #e6e2da;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding: 40px 24px 64px;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 30px;
+        letter-spacing: -0.02em;
+        margin: 0 0 6px;
+      }
+      h2 {
+        font-size: 20px;
+        margin: 48px 0 6px;
+      }
+      p.sub {
+        color: var(--muted);
+        font-size: 15px;
+        max-width: 720px;
+        line-height: 1.5;
+        margin: 0 0 20px;
+      }
+      p.sub b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 26px 28px 22px;
+        box-shadow:
+          0 1px 0 rgba(0, 0, 0, 0.02),
+          0 12px 30px -18px rgba(0, 0, 0, 0.18);
+      }
+      code {
+        background: #efece6;
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 0.92em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>AttriChart demos</h1>
+      <p class="sub">
+        Three configurations of the same engine. Build the library first with
+        <code>pnpm build</code>, then open this file directly in a browser.
+      </p>
+
+      <h2>1. Marketing attribution, reach mode (default)</h2>
+      <p class="sub">
+        The campaign column shows <b>reach</b>, so its segments sum past 100%: a user touched by two
+        campaigns is drawn from both. Where the translucent ribbons stack they darken, which is the
+        shared attribution made visible. From the traffic column rightward the flow consolidates to
+        true unique counts. Hover any ribbon to isolate one path.
+      </p>
+      <div class="card"><div id="demo-reach"></div></div>
+
+      <h2>2. Same data, fractional mode</h2>
+      <p class="sub">
+        With <code>attributionMode: "fractional"</code> a shared cohort splits its width evenly
+        across its campaigns. Every column is strictly additive and sums to 100%, at the cost of the
+        overlap darkening. Use this when arithmetic tidiness matters more than visual emphasis on
+        multi-touch.
+      </p>
+      <div class="card"><div id="demo-fractional"></div></div>
+
+      <h2>3. Four stages, overlap in the middle</h2>
+      <p class="sub">
+        The engine is not hardcoded to marketing or to three stages. Here a streaming service
+        journey runs device, genres watched, plan, renewal. The <b>genres</b> stage is the overlap
+        stage: subscribers watch several genres, so that column shows reach while its neighbors stay
+        clean partitions.
+      </p>
+      <div class="card"><div id="demo-stages"></div></div>
+    </div>
+
+    <script src="../packages/core/dist/index.global.js"></script>
+    <script>
+      const { AttriChart } = attrichart;
+
+      // Dataset 1 and 2: the marketing attribution example. 4,000 unique users,
+      // reach sums to 5,400 because of multi-touch cohorts.
+      const marketing = {
+        stages: [
+          {
+            id: 'campaign',
+            label: 'Campaigns',
+            overlap: true,
+            nodes: [
+              { id: 'search', label: 'Paid Search', color: '#2563eb' },
+              { id: 'social', label: 'Social', color: '#e07a2b' },
+              { id: 'display', label: 'Display', color: '#129b8b' },
+            ],
+          },
+          {
+            id: 'traffic',
+            label: 'Traffic type',
+            nodes: [
+              { id: 'product', label: 'Product Page', color: '#3c3a36' },
+              { id: 'landing', label: 'Landing Page', color: '#3c3a36' },
+              { id: 'blog', label: 'Blog', color: '#3c3a36' },
+            ],
+          },
+          {
+            id: 'conversion',
+            label: 'Conversion',
+            nodes: [
+              { id: 'purchase', label: 'Purchase', color: '#2f9e57' },
+              { id: 'lead', label: 'Lead', color: '#d99a16' },
+              { id: 'none', label: 'No Conversion', color: '#9b958c' },
+            ],
+          },
+        ],
+        records: [
+          {
+            value: 900,
+            membership: { campaign: ['search'], traffic: 'product', conversion: 'purchase' },
+          },
+          {
+            value: 400,
+            membership: { campaign: ['search'], traffic: 'landing', conversion: 'lead' },
+          },
+          { value: 700, membership: { campaign: ['social'], traffic: 'blog', conversion: 'none' } },
+          {
+            value: 350,
+            membership: { campaign: ['social'], traffic: 'landing', conversion: 'lead' },
+          },
+          {
+            value: 500,
+            membership: { campaign: ['display'], traffic: 'landing', conversion: 'none' },
+          },
+          {
+            value: 600,
+            membership: {
+              campaign: ['search', 'social'],
+              traffic: 'product',
+              conversion: 'purchase',
+            },
+          },
+          {
+            value: 300,
+            membership: { campaign: ['social', 'display'], traffic: 'blog', conversion: 'lead' },
+          },
+          {
+            value: 250,
+            membership: {
+              campaign: ['search', 'social', 'display'],
+              traffic: 'product',
+              conversion: 'purchase',
+            },
+          },
+        ],
+      };
+
+      // Dataset 3: four stages, overlap on the second stage.
+      const streaming = {
+        stages: [
+          {
+            id: 'device',
+            label: 'Signup device',
+            nodes: [
+              { id: 'mobile', label: 'Mobile', color: '#8b5cf6' },
+              { id: 'desktop', label: 'Desktop', color: '#2563eb' },
+              { id: 'tv', label: 'TV', color: '#129b8b' },
+            ],
+          },
+          {
+            id: 'genres',
+            label: 'Genres watched',
+            overlap: true,
+            nodes: [
+              { id: 'drama', label: 'Drama', color: '#d94862' },
+              { id: 'comedy', label: 'Comedy', color: '#e07a2b' },
+              { id: 'docs', label: 'Documentary', color: '#d99a16' },
+            ],
+          },
+          {
+            id: 'plan',
+            label: 'Plan',
+            nodes: [
+              { id: 'free', label: 'Free', color: '#9b958c' },
+              { id: 'standard', label: 'Standard', color: '#3c3a36' },
+              { id: 'premium', label: 'Premium', color: '#1c1b19' },
+            ],
+          },
+          {
+            id: 'outcome',
+            label: 'Renewal',
+            nodes: [
+              { id: 'renewed', label: 'Renewed', color: '#2f9e57' },
+              { id: 'churned', label: 'Churned', color: '#d94862' },
+            ],
+          },
+        ],
+        records: [
+          {
+            value: 300,
+            membership: { device: 'mobile', genres: ['drama'], plan: 'free', outcome: 'churned' },
+          },
+          {
+            value: 260,
+            membership: {
+              device: 'mobile',
+              genres: ['drama', 'comedy'],
+              plan: 'standard',
+              outcome: 'renewed',
+            },
+          },
+          {
+            value: 220,
+            membership: {
+              device: 'desktop',
+              genres: ['comedy'],
+              plan: 'standard',
+              outcome: 'renewed',
+            },
+          },
+          {
+            value: 140,
+            membership: {
+              device: 'desktop',
+              genres: ['docs'],
+              plan: 'premium',
+              outcome: 'renewed',
+            },
+          },
+          {
+            value: 180,
+            membership: {
+              device: 'tv',
+              genres: ['drama', 'docs'],
+              plan: 'premium',
+              outcome: 'renewed',
+            },
+          },
+          {
+            value: 160,
+            membership: { device: 'tv', genres: ['comedy'], plan: 'free', outcome: 'churned' },
+          },
+          {
+            value: 90,
+            membership: {
+              device: 'mobile',
+              genres: ['drama', 'comedy', 'docs'],
+              plan: 'premium',
+              outcome: 'renewed',
+            },
+          },
+          {
+            value: 150,
+            membership: {
+              device: 'desktop',
+              genres: ['drama'],
+              plan: 'standard',
+              outcome: 'churned',
+            },
+          },
+        ],
+      };
+
+      new AttriChart(document.getElementById('demo-reach'), marketing, {
+        a11y: { label: 'Campaign attribution flow, reach mode' },
+      }).render();
+
+      new AttriChart(document.getElementById('demo-fractional'), marketing, {
+        attributionMode: 'fractional',
+        a11y: { label: 'Campaign attribution flow, fractional mode' },
+      }).render();
+
+      new AttriChart(document.getElementById('demo-stages'), streaming, {
+        a11y: { label: 'Streaming service journey across four stages' },
+      }).render();
+    </script>
+  </body>
+</html>

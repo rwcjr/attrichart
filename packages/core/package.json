@@ -1,0 +1,61 @@
+{
+  "name": "@attrichart/core",
+  "version": "0.1.0",
+  "description": "Overlapping attribution flow charts. A Sankey-style diagram that renders multi-touch membership as visible overlap instead of double-counting or fractional splitting.",
+  "license": "MIT",
+  "author": "Robert Coleman",
+  "homepage": "https://github.com/attrichart/attrichart#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/attrichart/attrichart.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/attrichart/attrichart/issues"
+  },
+  "keywords": [
+    "sankey",
+    "attribution",
+    "multi-touch",
+    "marketing",
+    "funnel",
+    "flow",
+    "chart",
+    "charts",
+    "dataviz",
+    "visualization",
+    "svg",
+    "typescript"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.10.2",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
