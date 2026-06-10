@@ -25,6 +25,6 @@ const chart = new AttriChart(document.querySelector('#chart'), {
 chart.render();
 ```
 
-Full documentation, a live demo, options reference, and framework wrappers: [github.com/attrichart/attrichart](https://github.com/attrichart/attrichart).
+Full documentation, a live demo, options reference, and framework wrappers: [github.com/rwcjr/attrichart](https://github.com/rwcjr/attrichart).
 
 MIT licensed.

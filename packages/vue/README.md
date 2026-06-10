@@ -1,6 +1,6 @@
 # @attrichart/vue
 
-Vue 3 component for [AttriChart](https://github.com/attrichart/attrichart), the overlapping attribution flow chart. Vue is a peer dependency; nothing touches the DOM until mounted, so it works under SSR and Nuxt.
+Vue 3 component for [AttriChart](https://github.com/rwcjr/attrichart), the overlapping attribution flow chart. Vue is a peer dependency; nothing touches the DOM until mounted, so it works under SSR and Nuxt.
 
 ```sh
 npm install @attrichart/vue
@@ -38,6 +38,6 @@ Add `vuetify-theme` and the chart maps the active theme's `--v-theme-*` tokens t
 </v-card>
 ```
 
-Full documentation and the theme-token mapping: [github.com/attrichart/attrichart](https://github.com/attrichart/attrichart).
+Full documentation and the theme-token mapping: [github.com/rwcjr/attrichart](https://github.com/rwcjr/attrichart).
 
 MIT licensed.

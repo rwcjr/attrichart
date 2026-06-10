@@ -2,7 +2,7 @@
 
 A Sankey-style flow chart for journeys with overlapping membership. Built for multi-touch marketing attribution, generalized for any staged flow where one stage allows a record to belong to several nodes at once.
 
-[Live demo](https://attrichart.github.io/attrichart/) · [@attrichart/core](https://www.npmjs.com/package/@attrichart/core) · [@attrichart/vue](https://www.npmjs.com/package/@attrichart/vue)
+[Live demo](https://rwcjr.github.io/attrichart/) · [@attrichart/core](https://www.npmjs.com/package/@attrichart/core) · [@attrichart/vue](https://www.npmjs.com/package/@attrichart/vue)
 
 ![AttriChart rendering a campaign attribution flow](docs/hero.svg)
 

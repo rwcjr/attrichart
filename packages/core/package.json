@@ -4,14 +4,14 @@
   "description": "Overlapping attribution flow charts. A Sankey-style diagram that renders multi-touch membership as visible overlap instead of double-counting or fractional splitting.",
   "license": "MIT",
   "author": "Robert Coleman",
-  "homepage": "https://github.com/attrichart/attrichart#readme",
+  "homepage": "https://github.com/rwcjr/attrichart#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/attrichart/attrichart.git",
+    "url": "git+https://github.com/rwcjr/attrichart.git",
     "directory": "packages/core"
   },
   "bugs": {
-    "url": "https://github.com/attrichart/attrichart/issues"
+    "url": "https://github.com/rwcjr/attrichart/issues"
   },
   "keywords": [
     "sankey",

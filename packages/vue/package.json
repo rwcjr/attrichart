@@ -4,14 +4,14 @@
   "description": "Vue 3 component for AttriChart overlapping attribution flow charts, with first-class Vuetify 3 theme integration.",
   "license": "MIT",
   "author": "Robert Coleman",
-  "homepage": "https://github.com/attrichart/attrichart#readme",
+  "homepage": "https://github.com/rwcjr/attrichart#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/attrichart/attrichart.git",
+    "url": "git+https://github.com/rwcjr/attrichart.git",
     "directory": "packages/vue"
   },
   "bugs": {
-    "url": "https://github.com/attrichart/attrichart/issues"
+    "url": "https://github.com/rwcjr/attrichart/issues"
   },
   "keywords": [
     "sankey",
