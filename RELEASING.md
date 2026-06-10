@@ -27,8 +27,7 @@ If you need to publish by hand:
 
 ```sh
 pnpm install
-pnpm lint && pnpm typecheck && pnpm test
-pnpm build
+pnpm lint && pnpm build && pnpm typecheck && pnpm test
 npm login            # account with access to the attrichart org
 cd packages/core && npm publish --access public
 cd ../vue && npm publish --access public

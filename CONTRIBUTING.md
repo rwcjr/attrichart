@@ -27,7 +27,7 @@ Requires Node 18+ and pnpm.
 3. Run the full check locally:
 
 ```sh
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm lint && pnpm build && pnpm typecheck && pnpm test
 ```
 
 4. Add a changeset describing your change:

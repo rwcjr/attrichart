@@ -21,9 +21,10 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      # build first: @attrichart/vue typechecks against core's built declarations
+      - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm test
-      - run: pnpm build
       - name: Publish to npm
         run: pnpm -r --filter "./packages/**" publish --access public --no-git-checks
         env:
