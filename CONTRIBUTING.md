@@ -16,7 +16,7 @@ Requires Node 18+ and pnpm.
 
 - `packages/core`: the framework-agnostic engine. Layout math lives in `src/layout` and is pure (no DOM), rendering in `src/render`.
 - `packages/vue`: the Vue 3 wrapper and Vuetify theme integration.
-- `packages/react`: placeholder for the planned React wrapper.
+- `packages/react`: the React wrapper.
 - `examples/`: runnable HTML and Vue examples.
 - `docs/`: the demo site deployed to GitHub Pages.
 

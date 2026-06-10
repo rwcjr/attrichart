@@ -1,24 +1,45 @@
 # @attrichart/react
 
-Planned React wrapper for [@attrichart/core](../core). Not yet implemented.
+React component for [AttriChart](https://github.com/rwcjr/attrichart), the overlapping attribution flow chart. React 18 or 19 is a peer dependency; all DOM work happens in effects, so it is safe under SSR frameworks like Next.js.
 
-The package is marked `private` so it cannot be published by accident. Until it ships, use `@attrichart/core` directly in React:
+```sh
+npm install @attrichart/react
+```
 
 ```tsx
-import { useEffect, useRef } from 'react';
-import { AttriChart } from '@attrichart/core';
+import { AttriChart } from '@attrichart/react';
 
-function Chart({ data, options }) {
-  const el = useRef(null);
+const data = {
+  stages: [
+    { id: 'campaign', overlap: true, nodes: [{ id: 'search' }, { id: 'social' }] },
+    { id: 'conversion', nodes: [{ id: 'purchase' }, { id: 'none' }] },
+  ],
+  records: [
+    { value: 500, membership: { campaign: ['search'], conversion: 'purchase' } },
+    { value: 200, membership: { campaign: ['search', 'social'], conversion: 'purchase' } },
+    { value: 300, membership: { campaign: ['social'], conversion: 'none' } },
+  ],
+};
 
-  useEffect(() => {
-    const chart = new AttriChart(el.current, data, options);
-    chart.render();
-    return () => chart.destroy();
-  }, [data, options]);
-
-  return <div ref={el} style={{ width: '100%' }} />;
+export function Dashboard() {
+  return <AttriChart data={data} onNodeClick={(node) => console.log(node)} />;
 }
 ```
 
-Contributions welcome. The Vue wrapper in `packages/vue` is the reference for scope: props for data and options, events for node click, ribbon click, and hover, and container-driven responsive sizing.
+## Props
+
+| Prop                 | Type                           | Notes                                       |
+| -------------------- | ------------------------------ | ------------------------------------------- |
+| `data`               | `AttriChartData`               | Required. Stages plus records.              |
+| `options`            | `AttriChartOptions`            | Everything from the core options reference. |
+| `onNodeClick`        | `(node: NodeInfo) => void`     |                                             |
+| `onRibbonClick`      | `(ribbon: RibbonInfo) => void` |                                             |
+| `onHover`            | `(info: TooltipInfo) => void`  |                                             |
+| `onLeave`            | `() => void`                   |                                             |
+| `className`, `style` |                                | Applied to the wrapping div.                |
+
+The chart updates in place when `data` or `options` change identity, so define them at module scope or memoize with `useMemo`; an inline object literal recreates the chart's input on every render. Handler props may change freely.
+
+Full documentation and the options reference: [github.com/rwcjr/attrichart](https://github.com/rwcjr/attrichart).
+
+MIT licensed.

@@ -31,9 +31,10 @@ pnpm lint && pnpm build && pnpm typecheck && pnpm test
 npm login            # account with access to the attrichart org
 cd packages/core && npm publish --access public
 cd ../vue && npm publish --access public
+cd ../react && npm publish --access public
 ```
 
-Publish `core` before `vue` so the new core version exists when vue's dependency resolves.
+Publish `core` before the wrappers so the new core version exists when their dependency resolves.
 
 ## First-time npm org setup
 

@@ -2,7 +2,7 @@
 
 A Sankey-style flow chart for journeys with overlapping membership. Built for multi-touch marketing attribution, generalized for any staged flow where one stage allows a record to belong to several nodes at once.
 
-[Live demo](https://rwcjr.github.io/attrichart/) · [@attrichart/core](https://www.npmjs.com/package/@attrichart/core) · [@attrichart/vue](https://www.npmjs.com/package/@attrichart/vue)
+[Live demo](https://rwcjr.github.io/attrichart/) · [@attrichart/core](https://www.npmjs.com/package/@attrichart/core) · [@attrichart/vue](https://www.npmjs.com/package/@attrichart/vue) · [@attrichart/react](https://www.npmjs.com/package/@attrichart/react)
 
 ![AttriChart rendering a campaign attribution flow](docs/hero.svg)
 
@@ -209,6 +209,16 @@ Notes:
 
 A runnable example lives in [`examples/vue-vuetify`](examples/vue-vuetify), with a chart in a `v-card` and a light/dark toggle.
 
+## React
+
+```tsx
+import { AttriChart } from '@attrichart/react';
+
+<AttriChart data={data} options={options} onNodeClick={(node) => console.log(node)} />;
+```
+
+React 18 or 19 is a peer dependency. The chart updates in place when `data` or `options` change identity, so memoize them rather than recreating them inline each render. DOM work happens in effects, so it is SSR-safe.
+
 ## Examples
 
 - [`examples/demo.html`](examples/demo.html): three charts on one page covering reach mode, fractional mode, and a four-stage journey with overlap on a middle stage
@@ -223,7 +233,7 @@ Modern evergreen browsers. The library targets ES2020 and uses SVG, ResizeObserv
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and pull requests are welcome, including for the planned React wrapper.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and pull requests are welcome.
 
 ## License
 
